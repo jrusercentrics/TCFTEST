@@ -21,4 +21,34 @@ GLOBEX
     <h1>Usercentrics CMP V2 Test Page</h1>
     <img id="imgbtn" src="https://usercentrics.com/wp-content/uploads/2020/04/190208-UCS-Logo-800px.png" alt="uc-logo">
 </body>
+<script>
+  (function runConsentCheck() {
+  // 1. Check IAB GVL vendor (ID 967)
+  if (typeof __tcfapi === 'function') {
+    __tcfapi('getTCData', 2, function (tcData, success) {
+      if (success) {
+        const tcfConsent = tcData.vendor?.consents?.[967] === true;
+        console.log("[TCF] Consent for IAB vendor 967:", tcfConsent);
+      } else {
+        console.warn("[TCF] Failed to get TCData");
+      }
+    });
+  } else {
+    console.warn("[TCF] __tcfapi not available");
+  }
+
+  // 2. Listen to UC service consent event
+  window.addEventListener('UC_UI_CONSENT_STATUS', function (e) {
+    const services = e.detail?.consents?.services || [];
+    const ucConsent = services.find(s => s.id === 'BySu54sOjZQ');
+    if (ucConsent) {
+      console.log("[UC] Consent for Usercentrics vendor BySu54sOjZQ:", ucConsent.consent);
+    } else {
+      console.warn("[UC] Vendor BySu54sOjZQ not found in services consents");
+    }
+  });
+
+  console.log("[INIT] Waiting for both TCF and UC consent info...");
+})();
+</script>
 </html>
